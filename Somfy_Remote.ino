@@ -42,7 +42,7 @@ void SendCommand(byte *frame, byte sync);
 void setup() {
   Serial.begin(115200);
   DDRD |= 1<<PORT_TX; // Pin 5 an output
-  PORTD &= !(1<<PORT_TX); // Pin 5 LOW
+  PORTD &= ~(1<<PORT_TX); // Pin 5 LOW
 
   if (EEPROM.get(EEPROM_ADDRESS, rollingCode) < newRollingCode) {
     EEPROM.put(EEPROM_ADDRESS, newRollingCode);
@@ -148,24 +148,24 @@ void BuildFrame(byte *frame, byte button) {
 void SendCommand(byte *frame, byte sync) {
   if(sync == 2) { // Only with the first frame.
   //Wake-up pulse & Silence
-    PORTD |= 1<<PORT_TX;
-    delayMicroseconds(9415);
-    PORTD &= !(1<<PORT_TX);
-    delayMicroseconds(89565);
+    PORTD |= 1<<PORT_TX; // Set PORT_TX High
+    delayMicroseconds(9415); 
+    PORTD &= ~(1<<PORT_TX); // Set PORT_TX Low 
+    delayMicroseconds(89565); 
   }
 
 // Hardware sync: two sync for the first frame, seven for the following ones.
   for (int i = 0; i < sync; i++) {
-    PORTD |= 1<<PORT_TX;
-    delayMicroseconds(4*SYMBOL);
-    PORTD &= !(1<<PORT_TX);
+    PORTD |= 1<<PORT_TX; // Set PORT_TX High
+    delayMicroseconds(4*SYMBOL); 
+    PORTD &= ~(1<<PORT_TX); // Set PORT_TX Low 
     delayMicroseconds(4*SYMBOL);
   }
 
 // Software sync
   PORTD |= 1<<PORT_TX;
   delayMicroseconds(4550);
-  PORTD &= !(1<<PORT_TX);
+  PORTD &= ~(1<<PORT_TX);
   delayMicroseconds(SYMBOL);
   
   
@@ -185,6 +185,6 @@ void SendCommand(byte *frame, byte sync) {
     }
   }
   
-  PORTD &= !(1<<PORT_TX);
+  PORTD &= ~(1<<PORT_TX);
   delayMicroseconds(30415); // Inter-frame silence
 }
